@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ncu.mapper.HouseInfoMapper" >
+  <resultMap id="BaseResultMap" type="com.ncu.pojo.HouseInfo" >
+    <id column="house_id" property="houseId" jdbcType="INTEGER" />
+    <result column="type_id" property="typeId" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="house_address" property="houseAddress" jdbcType="VARCHAR" />
+    <result column="house_price" property="housePrice" jdbcType="INTEGER" />
+    <result column="house_ambient" property="houseAmbient" jdbcType="VARCHAR" />
+    <result column="is_used" property="isUsed" jdbcType="VARCHAR" />
+    <association property="ui" javaType="com.ncu.pojo.UserInfo">
+    	<result property="userName" column="user_name"/>
+    </association>
+    <association property="ht" javaType="com.ncu.pojo.HouseType">
+    	<result property="typeName" column="type_name"/>
+    </association>
+  </resultMap>
+  
+  <select id="selecttotalCount" resultType="Integer">
+  	SELECT count(1)
+	FROM `house_info` hi
+	LEFT JOIN `user_info` ui ON ui.`user_id`=hi.`user_id`
+	LEFT JOIN `house_type` ht ON ht.`type_id`=hi.`type_id`
+  </select>
+  	
+  <select id="selectNowPageData" resultMap="BaseResultMap">
+  	SELECT hi.*,ht.type_name,ui.user_name
+	FROM `house_info` hi
+	LEFT JOIN `user_info` ui ON ui.`user_id`=hi.`user_id`
+	LEFT JOIN `house_type` ht ON ht.`type_id`=hi.`type_id`
+	
+	<where>
+		<if test="queryType==1">
+			ht.type_name like "%"#{queryContent}"%"
+		</if>
+		<if test="queryType==2">
+			hi.house_address like "%"#{queryContent}"%"
+		</if>
+	</where>
+  	limit #{startPos},#{pageSize}
+  </select>
+  
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    house_id, type_id, user_id, house_address, house_price, house_ambient, is_used
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ncu.pojo.HouseInfoExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from house_info
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from house_info
+    where house_id = #{houseId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from house_info
+    where house_id = #{houseId,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ncu.pojo.HouseInfoExample" >
+    delete from house_info
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ncu.pojo.HouseInfo" >
+    insert into house_info (house_id, type_id, user_id, 
+      house_address, house_price, house_ambient, 
+      is_used)
+    values (#{houseId,jdbcType=INTEGER}, #{typeId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, 
+      #{houseAddress,jdbcType=VARCHAR}, #{housePrice,jdbcType=INTEGER}, #{houseAmbient,jdbcType=VARCHAR}, 
+      #{isUsed,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ncu.pojo.HouseInfo" >
+    insert into house_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="houseId != null" >
+        house_id,
+      </if>
+      <if test="typeId != null" >
+        type_id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="houseAddress != null" >
+        house_address,
+      </if>
+      <if test="housePrice != null" >
+        house_price,
+      </if>
+      <if test="houseAmbient != null" >
+        house_ambient,
+      </if>
+      <if test="isUsed != null" >
+        is_used,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="houseId != null" >
+        #{houseId,jdbcType=INTEGER},
+      </if>
+      <if test="typeId != null" >
+        #{typeId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="houseAddress != null" >
+        #{houseAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="housePrice != null" >
+        #{housePrice,jdbcType=INTEGER},
+      </if>
+      <if test="houseAmbient != null" >
+        #{houseAmbient,jdbcType=VARCHAR},
+      </if>
+      <if test="isUsed != null" >
+        #{isUsed,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ncu.pojo.HouseInfoExample" resultType="java.lang.Integer" >
+    select count(*) from house_info
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update house_info
+    <set >
+      <if test="record.houseId != null" >
+        house_id = #{record.houseId,jdbcType=INTEGER},
+      </if>
+      <if test="record.typeId != null" >
+        type_id = #{record.typeId,jdbcType=INTEGER},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=INTEGER},
+      </if>
+      <if test="record.houseAddress != null" >
+        house_address = #{record.houseAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="record.housePrice != null" >
+        house_price = #{record.housePrice,jdbcType=INTEGER},
+      </if>
+      <if test="record.houseAmbient != null" >
+        house_ambient = #{record.houseAmbient,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isUsed != null" >
+        is_used = #{record.isUsed,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update house_info
+    set house_id = #{record.houseId,jdbcType=INTEGER},
+      type_id = #{record.typeId,jdbcType=INTEGER},
+      user_id = #{record.userId,jdbcType=INTEGER},
+      house_address = #{record.houseAddress,jdbcType=VARCHAR},
+      house_price = #{record.housePrice,jdbcType=INTEGER},
+      house_ambient = #{record.houseAmbient,jdbcType=VARCHAR},
+      is_used = #{record.isUsed,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ncu.pojo.HouseInfo" >
+    update house_info
+    <set >
+      <if test="typeId != null" >
+        type_id = #{typeId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="houseAddress != null" >
+        house_address = #{houseAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="housePrice != null" >
+        house_price = #{housePrice,jdbcType=INTEGER},
+      </if>
+      <if test="houseAmbient != null" >
+        house_ambient = #{houseAmbient,jdbcType=VARCHAR},
+      </if>
+      <if test="isUsed != null" >
+        is_used = #{isUsed,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where house_id = #{houseId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ncu.pojo.HouseInfo" >
+    update house_info
+    set type_id = #{typeId,jdbcType=INTEGER},
+      user_id = #{userId,jdbcType=INTEGER},
+      house_address = #{houseAddress,jdbcType=VARCHAR},
+      house_price = #{housePrice,jdbcType=INTEGER},
+      house_ambient = #{houseAmbient,jdbcType=VARCHAR},
+      is_used = #{isUsed,jdbcType=VARCHAR}
+    where house_id = #{houseId,jdbcType=INTEGER}
+  </update>
+</mapper>
