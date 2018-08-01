@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns="http://www.springframework.org/schema/beans" 
+       xmlns:context="http://www.springframework.org/schema/context" 
+       xmlns:aop="http://www.springframework.org/schema/aop" 
+       xmlns:tx="http://www.springframework.org/schema/tx" 
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd 
+       http://www.springframework.org/schema/context 
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd ">
+<!-- spring整合mybatis -->
+<!-- 1.spring整合数据源连接池 -->
+<!-- context:property-placeholder 标签最好只出现一次，所以有多个properties文件需要加载时,写成*.properties -->
+<context:property-placeholder location="classpath:*.properties"/>
+<bean name="ds" class="org.apache.commons.dbcp.BasicDataSource">
+	<property name="driverClassName" value="${jdbc.dirver}"></property>
+	<property name="url" value="${jdbc.url}"></property>
+	<property name="username" value="${jdbc.user}"></property>
+	<property name="password" value="${jdbc.pwd}"></property>
+</bean>
+
+<!-- 2.spring整合mybatis的SqlsessionFactory工厂 -->
+<bean name="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<property name="dataSource" ref="ds"></property>
+	<property name="configLocation" value="classpath:sqlMapConfig.xml"></property>
+</bean>
+
+<!-- SqlSessionTemplate保证创建出的sqlSession线程安全 -->
+<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+	<constructor-arg index="0" ref="sqlSessionFactoryBean" />
+</bean>
+
+<!-- 3.spring整合mybatis代理,代理对象交给spring,管理dao层对象 -->
+<bean name="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	<!-- 配置加载mapper.xml位置,所在的包 -->
+	<property name="basePackage" value="com.ncu.mapper"></property>
+</bean>
+
+
+</beans>
